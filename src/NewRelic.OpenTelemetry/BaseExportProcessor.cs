@@ -41,8 +41,12 @@ public abstract class BaseExportProcessor<T> : BaseProcessor<T>
     protected BaseExportProcessor(BaseExporter<T> exporter)
     {
         // Guard.ThrowIfNull(exporter);
+        if (exporter == null)
+        {
+            throw new ArgumentNullException(nameof(exporter));
+        }
 
-        this.friendlyTypeName = $"{this.GetType().Name}{{{this.exporter!.GetType().Name}}}";
+        this.friendlyTypeName = $"{this.GetType().Name}{{{exporter!.GetType().Name}}}";
         this.exporter = exporter;
     }
 
