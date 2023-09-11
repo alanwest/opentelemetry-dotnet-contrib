@@ -1,0 +1,15 @@
+abstract NewRelic.OpenTelemetry.BaseExportProcessor<T>.OnExport(T data) -> void
+NewRelic.OpenTelemetry.BaseExportProcessor<T>
+NewRelic.OpenTelemetry.BaseExportProcessor<T>.BaseExportProcessor(OpenTelemetry.BaseExporter<T> exporter) -> void
+NewRelic.OpenTelemetry.HopExportProcessor
+NewRelic.OpenTelemetry.HopExportProcessor.HopExportProcessor(OpenTelemetry.BaseExporter<System.Diagnostics.Activity> exporter) -> void
+override NewRelic.OpenTelemetry.BaseExportProcessor<T>.Dispose(bool disposing) -> void
+override NewRelic.OpenTelemetry.BaseExportProcessor<T>.OnEnd(T data) -> void
+override NewRelic.OpenTelemetry.BaseExportProcessor<T>.OnForceFlush(int timeoutMilliseconds) -> bool
+override NewRelic.OpenTelemetry.BaseExportProcessor<T>.OnShutdown(int timeoutMilliseconds) -> bool
+override NewRelic.OpenTelemetry.BaseExportProcessor<T>.OnStart(T data) -> void
+override NewRelic.OpenTelemetry.BaseExportProcessor<T>.ToString() -> string
+override NewRelic.OpenTelemetry.HopExportProcessor.OnEnd(System.Diagnostics.Activity activity) -> void
+override NewRelic.OpenTelemetry.HopExportProcessor.OnExport(System.Diagnostics.Activity activity) -> void
+override NewRelic.OpenTelemetry.HopExportProcessor.OnStart(System.Diagnostics.Activity activity) -> void
+readonly NewRelic.OpenTelemetry.BaseExportProcessor<T>.exporter -> OpenTelemetry.BaseExporter<T>

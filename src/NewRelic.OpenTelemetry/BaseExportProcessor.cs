@@ -14,10 +14,12 @@
 // limitations under the License.
 // </copyright>
 
+#pragma warning disable CA1051
+#pragma warning disable CA1708
+#pragma warning disable CS1591
 #nullable enable
 
 using OpenTelemetry;
-// using OpenTelemetry.Internal;
 
 namespace NewRelic.OpenTelemetry;
 
@@ -40,7 +42,7 @@ public abstract class BaseExportProcessor<T> : BaseProcessor<T>
     {
         // Guard.ThrowIfNull(exporter);
 
-        this.friendlyTypeName = $"{this.GetType().Name}{{{exporter.GetType().Name}}}";
+        this.friendlyTypeName = $"{this.GetType().Name}{{{this.exporter!.GetType().Name}}}";
         this.exporter = exporter;
     }
 
@@ -55,6 +57,7 @@ public abstract class BaseExportProcessor<T> : BaseProcessor<T>
     {
     }
 
+    /// <inheritdoc />
     public override void OnEnd(T data)
     {
         this.OnExport(data);
@@ -66,6 +69,10 @@ public abstract class BaseExportProcessor<T> : BaseProcessor<T>
     //     this.exporter.ParentProvider = parentProvider;
     // }
 
+    /// <summary>
+    /// Invoked on export.
+    /// </summary>
+    /// <param name="data">The data to export.</param>
     protected abstract void OnExport(T data);
 
     /// <inheritdoc />
@@ -91,7 +98,7 @@ public abstract class BaseExportProcessor<T> : BaseProcessor<T>
                 {
                     this.exporter.Dispose();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // OpenTelemetrySdkEventSource.Log.SpanProcessorException(nameof(this.Dispose), ex);
                 }
@@ -103,3 +110,6 @@ public abstract class BaseExportProcessor<T> : BaseProcessor<T>
         base.Dispose(disposing);
     }
 }
+#pragma warning restore CS1591
+#pragma warning restore CA1708
+#pragma warning restore CA1051
