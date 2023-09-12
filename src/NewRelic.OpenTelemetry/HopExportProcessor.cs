@@ -55,7 +55,8 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
         if (hop.OnEnd(data))
         {
             using var batch = new Batch<Activity>(hop.Spans, hop.Spans.Length);
-            this.exporter.Export(batch);
+            var result = this.exporter.Export(batch);
+            Console.WriteLine($"Exporting {hop.Spans.Length} spans: {result}");
         }
     }
 }
