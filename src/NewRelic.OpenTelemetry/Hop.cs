@@ -33,17 +33,6 @@ internal sealed class Hop : IHop
 
     public Activity[] Spans => this.spans.ToArray();
 
-    public void SpanStart(Activity activity)
-    {
-        if (activity.IsHopStart(out var reason))
-        {
-            HopExportProcessorEventSource.Log.Stuff($"Start hop {this.GetHashCode()}: {activity.DisplayName}");
-            Current = new Hop();
-        }
-
-        HopExportProcessorEventSource.Log.Stuff($"Span started: {activity.DisplayName}");
-    }
-
     public bool SpanEnd(Activity activity)
     {
         this.spans.Add(activity);

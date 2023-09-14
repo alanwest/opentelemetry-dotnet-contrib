@@ -22,10 +22,6 @@ internal sealed class NoopHop : IHop
 {
     public Activity[] Spans => Array.Empty<Activity>();
 
-    public void SpanStart(Activity activity)
-    {
-    }
-
     public bool SpanEnd(Activity activity)
     {
         return false;

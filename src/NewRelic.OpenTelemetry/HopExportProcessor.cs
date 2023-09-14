@@ -36,7 +36,14 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     /// <inheritdoc />
     public override void OnStart(Activity data)
     {
-        Hop.Current.SpanStart(data);
+        if (data.IsHopStart(out var reason))
+        {
+            HopExportProcessorEventSource.Log.Stuff($"Start hop {this.GetHashCode()}: {reason} {data.DisplayName}");
+            var hop = new Hop();
+            Hop.Current = hop;
+        }
+
+        HopExportProcessorEventSource.Log.Stuff($"Span started: {data.DisplayName}");
     }
 
     /// <inheritdoc />

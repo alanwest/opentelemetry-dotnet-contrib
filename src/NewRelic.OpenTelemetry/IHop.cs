@@ -22,7 +22,5 @@ internal interface IHop
 {
     Activity[] Spans { get; }
 
-    void SpanStart(Activity activity);
-
     bool SpanEnd(Activity activity);
 }
