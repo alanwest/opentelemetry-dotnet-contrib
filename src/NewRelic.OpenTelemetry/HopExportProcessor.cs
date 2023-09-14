@@ -38,8 +38,9 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     /// <inheritdoc />
     public override void OnStart(Activity data)
     {
-        HopExportProcessorEventSource.Log.Stuff($"Span started: {data.DisplayName} {data.Kind} {data.IsTransactionStart()}");
-        if (data != null && data.IsTransactionStart())
+        var entryPoint = data.ParentSpanId == default || data.HasRemoteParent;
+        HopExportProcessorEventSource.Log.Stuff($"Span started: {data.DisplayName} {data.Kind} {data.ParentSpanId} {data.HasRemoteParent}");
+        if (data != null && entryPoint)
         {
             Hop.StartHop();
             HopExportProcessorEventSource.Log.Stuff($"Start hop {Hop.Current.GetHashCode()}: {data.DisplayName}");

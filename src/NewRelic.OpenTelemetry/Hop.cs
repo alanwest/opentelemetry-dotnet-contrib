@@ -43,6 +43,6 @@ internal sealed class Hop : ITransaction
     public bool OnEnd(Activity activity)
     {
         this.spans.Add(activity);
-        return activity.IsTransactionStart();
+        return activity.ParentSpanId == default || activity.HasRemoteParent;
     }
 }

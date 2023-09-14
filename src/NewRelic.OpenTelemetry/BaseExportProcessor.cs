@@ -59,7 +59,6 @@ public abstract class BaseExportProcessor<T> : BaseProcessor<T>
     /// <inheritdoc />
     public override void OnStart(T data)
     {
-        HopExportProcessorEventSource.Log.Stuff("HopExportProcessor: WTF?");
     }
 
     /// <inheritdoc />
