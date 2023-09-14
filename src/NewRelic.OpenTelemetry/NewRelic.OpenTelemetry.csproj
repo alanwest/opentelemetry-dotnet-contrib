@@ -12,6 +12,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
 
     <EnablePublicApi>false</EnablePublicApi>
+
+    <NoWarn>$(NoWarn);CA1062</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
