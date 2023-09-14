@@ -38,6 +38,7 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     /// <inheritdoc />
     public override void OnStart(Activity data)
     {
+        HopExportProcessorEventSource.Log.Stuff($"Span started: {data.DisplayName} {data.Kind} {data.IsTransactionStart()}");
         if (data != null && data.IsTransactionStart())
         {
             Hop.StartHop();
