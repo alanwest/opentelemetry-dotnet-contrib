@@ -16,6 +16,7 @@
 
 using System.Diagnostics;
 using OpenTelemetry;
+using OpenTelemetry.Exporter;
 
 namespace NewRelic.OpenTelemetry;
 
@@ -28,9 +29,10 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     /// Initializes a new instance of the <see cref="HopExportProcessor"/> class.
     /// </summary>
     /// <param name="exporter">Exporter instance.</param>
-    public HopExportProcessor(BaseExporter<Activity> exporter)
-        : base(exporter)
+    public HopExportProcessor(OtlpExporterOptions options)
+        : base(new OpenTelemetry.Exporter.OtlpTraceExporter(options))
     {
+        HopExportProcessorEventSource.Log.Stuff($"Initialized. Endpoint={options.Endpoint}");
     }
 
     /// <inheritdoc />
@@ -52,11 +54,14 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     protected override void OnExport(Activity data)
     {
         var hop = Hop.Current;
+
+        HopExportProcessorEventSource.Log.Stuff($"Span ended: {data.DisplayName}");
+
         if (hop.OnEnd(data))
         {
+            HopExportProcessorEventSource.Log.Stuff($"Exporting spans. Count={hop.Spans.Length}");
             using var batch = new Batch<Activity>(hop.Spans, hop.Spans.Length);
             var result = this.exporter.Export(batch);
-            Console.WriteLine($"Exporting {hop.Spans.Length} spans: {result}");
         }
     }
 }
