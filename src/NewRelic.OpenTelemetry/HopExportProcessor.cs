@@ -28,9 +28,9 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     /// <summary>
     /// Initializes a new instance of the <see cref="HopExportProcessor"/> class.
     /// </summary>
-    /// <param name="exporter">Exporter instance.</param>
+    /// <param name="options">Exporter instance.</param>
     public HopExportProcessor(OtlpExporterOptions options)
-        : base(new OpenTelemetry.Exporter.OtlpTraceExporter(options))
+        : base(new OtlpTraceExporter(options))
     {
         HopExportProcessorEventSource.Log.Stuff($"Initialized. Endpoint={options.Endpoint}");
     }

@@ -7,7 +7,7 @@
     <IncludeSharedExceptionExtensionsSource>true</IncludeSharedExceptionExtensionsSource>
     <Description>OpenTelemetry .NET SDK preview features and extensions</Description>
     <MinVerTagPrefix>NewRelic-</MinVerTagPrefix>
-    <Nullable>enable</Nullable>
+    <!-- <Nullable>enable</Nullable> -->
 
     <ImplicitUsings>enable</ImplicitUsings>
 
