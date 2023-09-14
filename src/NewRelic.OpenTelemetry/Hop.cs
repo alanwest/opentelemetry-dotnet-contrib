@@ -36,14 +36,6 @@ internal sealed class Hop : IHop
     public bool SpanEnd(Activity activity)
     {
         this.spans.Add(activity);
-
-        if (activity.IsHopStart(out var _))
-        {
-            HopExportProcessorEventSource.Log.Stuff($"End hop {this.GetHashCode()}: Count={this.spans.Count}");
-            return true;
-        }
-
-        HopExportProcessorEventSource.Log.Stuff($"Span ended {this.GetHashCode()}: {activity.DisplayName}");
-        return false;
+        return activity.IsHopStart(out var _);
     }
 }

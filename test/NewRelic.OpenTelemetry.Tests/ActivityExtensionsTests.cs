@@ -46,6 +46,6 @@ public class ActivityExtensionsTests
             : default;
         using var activity = activitySource.StartActivity($"{nameof(this.IsTransactionStartTest)}", kind, parentContext);
         Assert.NotNull(activity);
-        Assert.Equal(expected, activity.IsTransactionStart());
+        Assert.Equal(expected, activity.IsHopStart(out var _));
     }
 }

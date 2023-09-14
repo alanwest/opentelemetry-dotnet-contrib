@@ -24,6 +24,8 @@ namespace NewRelic.OpenTelemetry;
 /// </summary>
 public class HopExportProcessor : BaseExportProcessor<Activity>
 {
+    private readonly object mutex = new();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="HopExportProcessor"/> class.
     /// </summary>
@@ -52,8 +54,17 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
         var hop = Hop.Current;
         if (hop.SpanEnd(data))
         {
-            using var batch = new Batch<Activity>(hop.Spans, hop.Spans.Length);
-            var result = this.exporter.Export(batch);
+            var spans = hop.Spans;
+            using var batch = new Batch<Activity>(spans, spans.Length);
+
+            lock (this.mutex)
+            {
+                var result = this.exporter.Export(batch);
+            }
+
+            HopExportProcessorEventSource.Log.Stuff($"End hop {this.GetHashCode()}: Count={spans.Length}");
         }
+
+        HopExportProcessorEventSource.Log.Stuff($"Span ended {this.GetHashCode()}: {data.DisplayName}");
     }
 }
