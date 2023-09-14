@@ -1,4 +1,4 @@
-// <copyright file="NoopTransaction.cs" company="OpenTelemetry Authors">
+// <copyright file="NoopHop.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,15 @@ using System.Diagnostics;
 
 namespace NewRelic.OpenTelemetry;
 
-internal sealed class NoopTransaction : ITransaction
+internal sealed class NoopHop : IHop
 {
     public Activity[] Spans => Array.Empty<Activity>();
 
-    public bool OnEnd(Activity activity)
+    public void SpanStart(Activity activity)
+    {
+    }
+
+    public bool SpanEnd(Activity activity)
     {
         return false;
     }

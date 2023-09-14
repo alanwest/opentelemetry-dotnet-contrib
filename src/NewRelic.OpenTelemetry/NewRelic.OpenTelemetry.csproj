@@ -13,7 +13,7 @@
 
     <EnablePublicApi>false</EnablePublicApi>
 
-    <NoWarn>$(NoWarn);CA1062</NoWarn>
+    <NoWarn>$(NoWarn);CA1062;SA1602</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

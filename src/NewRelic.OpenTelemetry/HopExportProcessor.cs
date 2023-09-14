@@ -16,7 +16,6 @@
 
 using System.Diagnostics;
 using OpenTelemetry;
-using OpenTelemetry.Exporter;
 
 namespace NewRelic.OpenTelemetry;
 
@@ -28,39 +27,24 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     /// <summary>
     /// Initializes a new instance of the <see cref="HopExportProcessor"/> class.
     /// </summary>
-    /// <param name="options">Exporter instance.</param>
-    public HopExportProcessor(OtlpExporterOptions options)
-        : base(new OtlpTraceExporter(options))
+    /// <param name="exporter">Exporter instance.</param>
+    public HopExportProcessor(BaseExporter<Activity> exporter)
+        : base(exporter)
     {
-        HopExportProcessorEventSource.Log.Stuff($"Initialized. Endpoint={options.Endpoint}");
     }
 
     /// <inheritdoc />
     public override void OnStart(Activity data)
     {
-        var entryPoint = data.ParentSpanId == default || data.HasRemoteParent;
-        HopExportProcessorEventSource.Log.Stuff($"Span started: {data.DisplayName} {data.Kind} {data.ParentSpanId} {data.HasRemoteParent}");
-        if (data != null && entryPoint)
-        {
-            Hop.StartHop();
-            HopExportProcessorEventSource.Log.Stuff($"Start hop {Hop.Current.GetHashCode()}: {data.DisplayName}");
-        }
-    }
-
-    /// <inheritdoc />
-    public override void OnEnd(Activity data)
-    {
-        HopExportProcessorEventSource.Log.Stuff($"Span ended {Hop.Current.GetHashCode()}: {data.DisplayName} {data.Kind}");
-        this.OnExport(data);
+        Hop.Current.SpanStart(data);
     }
 
     /// <inheritdoc />
     protected override void OnExport(Activity data)
     {
         var hop = Hop.Current;
-        if (hop.OnEnd(data))
+        if (hop.SpanEnd(data))
         {
-            HopExportProcessorEventSource.Log.Stuff($"End hop {Hop.Current.GetHashCode()}: Count={hop.Spans.Length}");
             using var batch = new Batch<Activity>(hop.Spans, hop.Spans.Length);
             var result = this.exporter.Export(batch);
         }

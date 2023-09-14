@@ -18,14 +18,14 @@ using System.Diagnostics;
 
 namespace NewRelic.OpenTelemetry;
 
-internal sealed class Hop : ITransaction
+internal sealed class Hop : IHop
 {
-    private static readonly ITransaction Noop = new NoopTransaction();
-    private static readonly AsyncLocal<ITransaction> CurrentPrivate = new AsyncLocal<ITransaction>();
+    private static readonly IHop Noop = new NoopHop();
+    private static readonly AsyncLocal<IHop> CurrentPrivate = new AsyncLocal<IHop>();
 
     private List<Activity> spans = new List<Activity>();
 
-    public static ITransaction Current
+    public static IHop Current
     {
         get => CurrentPrivate.Value ?? Noop;
         set => CurrentPrivate.Value = value != null ? value : Noop;
@@ -33,16 +33,28 @@ internal sealed class Hop : ITransaction
 
     public Activity[] Spans => this.spans.ToArray();
 
-    public static Hop StartHop()
+    public void SpanStart(Activity activity)
     {
-        var hop = new Hop();
-        Current = hop;
-        return hop;
+        if (activity.IsHopStart(out var reason))
+        {
+            HopExportProcessorEventSource.Log.Stuff($"Start hop {this.GetHashCode()}: {activity.DisplayName}");
+            Current = new Hop();
+        }
+
+        HopExportProcessorEventSource.Log.Stuff($"Span started: {activity.DisplayName}");
     }
 
-    public bool OnEnd(Activity activity)
+    public bool SpanEnd(Activity activity)
     {
         this.spans.Add(activity);
-        return activity.ParentSpanId == default || activity.HasRemoteParent;
+
+        if (activity.IsHopStart(out var _))
+        {
+            HopExportProcessorEventSource.Log.Stuff($"End hop {this.GetHashCode()}: Count={this.spans.Count}");
+            return true;
+        }
+
+        HopExportProcessorEventSource.Log.Stuff($"Span ended {this.GetHashCode()}: {activity.DisplayName}");
+        return false;
     }
 }
