@@ -23,7 +23,7 @@ internal sealed class HopExportProcessorEventSource : EventSource
 {
     public static readonly HopExportProcessorEventSource Log = new HopExportProcessorEventSource();
 
-    [Event(1, Message = "Exporter failed to send trace data. Exception: {0}", Level = EventLevel.Error)]
+    [Event(1, Message = "HopExportProcessor: {0}", Level = EventLevel.Error)]
     public void Stuff(string stuff)
     {
         this.WriteEvent(1, stuff);

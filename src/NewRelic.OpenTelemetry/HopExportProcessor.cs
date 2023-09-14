@@ -41,12 +41,14 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
         if (data != null && data.IsTransactionStart())
         {
             Hop.StartHop();
+            HopExportProcessorEventSource.Log.Stuff($"Start hop {Hop.Current.GetHashCode()}: {data.DisplayName}");
         }
     }
 
     /// <inheritdoc />
     public override void OnEnd(Activity data)
     {
+        HopExportProcessorEventSource.Log.Stuff($"Span ended {Hop.Current.GetHashCode()}: {data.DisplayName} {data.Kind}");
         this.OnExport(data);
     }
 
@@ -54,12 +56,9 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     protected override void OnExport(Activity data)
     {
         var hop = Hop.Current;
-
-        HopExportProcessorEventSource.Log.Stuff($"Span ended: {data.DisplayName}");
-
         if (hop.OnEnd(data))
         {
-            HopExportProcessorEventSource.Log.Stuff($"Exporting spans. Count={hop.Spans.Length}");
+            HopExportProcessorEventSource.Log.Stuff($"End hop {Hop.Current.GetHashCode()}: Count={hop.Spans.Length}");
             using var batch = new Batch<Activity>(hop.Spans, hop.Spans.Length);
             var result = this.exporter.Export(batch);
         }
