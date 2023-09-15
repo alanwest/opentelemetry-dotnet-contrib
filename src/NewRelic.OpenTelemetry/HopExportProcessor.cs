@@ -40,12 +40,12 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     {
         if (data.IsHopStart(out var reason))
         {
-            HopExportProcessorEventSource.Log.Stuff($"Start hop {this.GetHashCode()}: {reason} {data.DisplayName}");
             var hop = new Hop();
             Hop.Current = hop;
+            HopExportProcessorEventSource.Log.Stuff($"Start hop {hop.GetHashCode()}: {reason} {data.DisplayName}");
         }
 
-        HopExportProcessorEventSource.Log.Stuff($"Span started: {data.DisplayName}");
+        HopExportProcessorEventSource.Log.Stuff($"Span started {Hop.Current.GetHashCode()}: {data.DisplayName}");
     }
 
     /// <inheritdoc />
@@ -62,9 +62,9 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
                 var result = this.exporter.Export(batch);
             }
 
-            HopExportProcessorEventSource.Log.Stuff($"End hop {this.GetHashCode()}: Count={spans.Length}");
+            HopExportProcessorEventSource.Log.Stuff($"End hop {hop.GetHashCode()}: Count={spans.Length}");
         }
 
-        HopExportProcessorEventSource.Log.Stuff($"Span ended {this.GetHashCode()}: {data.DisplayName}");
+        HopExportProcessorEventSource.Log.Stuff($"Span ended {hop.GetHashCode()}: {data.DisplayName}");
     }
 }
