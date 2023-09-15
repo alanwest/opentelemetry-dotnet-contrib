@@ -31,6 +31,8 @@ internal sealed class Hop : IHop
         set => CurrentPrivate.Value = value != null ? value : Noop;
     }
 
+    public int HopId => this.GetHashCode();
+
     public Activity[] Spans => this.spans.ToArray();
 
     public bool SpanEnd(Activity activity)

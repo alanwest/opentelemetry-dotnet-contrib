@@ -20,6 +20,8 @@ namespace NewRelic.OpenTelemetry;
 
 internal interface IHop
 {
+    int HopId { get; }
+
     Activity[] Spans { get; }
 
     bool SpanEnd(Activity activity);

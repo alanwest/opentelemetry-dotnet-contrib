@@ -20,6 +20,8 @@ namespace NewRelic.OpenTelemetry;
 
 internal sealed class NoopHop : IHop
 {
+    public int HopId => 0;
+
     public Activity[] Spans => Array.Empty<Activity>();
 
     public bool SpanEnd(Activity activity)
