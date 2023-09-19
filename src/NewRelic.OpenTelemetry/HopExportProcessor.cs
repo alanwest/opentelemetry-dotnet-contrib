@@ -38,6 +38,8 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     /// <inheritdoc />
     public override void OnStart(Activity data)
     {
+        this.SetExporterParentProvider();
+
         if (data.IsHopStart(out var reason))
         {
             var hop = new Hop();
@@ -66,5 +68,10 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
         }
 
         HopExportProcessorEventSource.Log.Stuff($"Span ended {hop.HopId}: {data.DisplayName}");
+    }
+
+    private void SetExporterParentProvider()
+    {
+        this.exporter.GetType().GetProperty("ParentProvider").GetSetMethod(true).Invoke(this.exporter, new[] { this.ParentProvider });
     }
 }
