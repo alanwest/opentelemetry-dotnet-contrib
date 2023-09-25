@@ -33,6 +33,8 @@ internal sealed class Hop : IHop
 
     public int HopId => this.GetHashCode();
 
+    public bool IsValid => true;
+
     public Activity[] Spans => this.spans.ToArray();
 
     public bool SpanEnd(Activity activity)

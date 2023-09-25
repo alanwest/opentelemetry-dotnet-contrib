@@ -22,6 +22,8 @@ internal interface IHop
 {
     int HopId { get; }
 
+    bool IsValid { get; }
+
     Activity[] Spans { get; }
 
     bool SpanEnd(Activity activity);
