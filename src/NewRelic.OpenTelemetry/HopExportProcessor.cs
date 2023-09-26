@@ -46,7 +46,7 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
         if (data.IsHopStart(out var reason))
         {
             hops.TryAdd(data.Id, new(data.Id, new Hop()));
-            HopExportProcessorEventSource.Log.Stuff($"Start hop {data.Id}: {reason} {data.DisplayName}");
+            HopExportProcessorEventSource.Log.Stuff($"Root span started {data.Id}: {reason} {data.DisplayName}");
         }
         else if (hops.TryGetValue(data.ParentId, out var hopEntry))
         {
@@ -80,16 +80,16 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
                     hops.TryRemove(span.Id, out var _);
                 }
 
-                HopExportProcessorEventSource.Log.Stuff($"End hop {hop.HopId}: Count={spans.Length}");
+                HopExportProcessorEventSource.Log.Stuff($"Root span ended {data.Id}: Count={spans.Length}");
             }
             else
             {
-                HopExportProcessorEventSource.Log.Stuff($"Span ended {hop.HopId}: {data.DisplayName}");
+                HopExportProcessorEventSource.Log.Stuff($"Span ended {data.Id}: {data.DisplayName}");
             }
         }
         else
         {
-            HopExportProcessorEventSource.Log.Stuff($"OnEnd no hop {data.DisplayName}");
+            HopExportProcessorEventSource.Log.Stuff($"OnEnd no hop ParentId={data.ParentId}, ParentSpanId={data.ParentSpanId}, Id={data.Id}, SpanId={data.SpanId}, DisplayName={data.DisplayName}");
         }
     }
 
