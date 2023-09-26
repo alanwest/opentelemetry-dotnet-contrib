@@ -43,63 +43,56 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     {
         this.SetExporterParentProvider();
 
-        Hop hop;
-
         if (data.IsHopStart(out var reason))
         {
-            hop = new Hop();
+            var hop = new Hop();
             this.hops.TryAdd(data.Id, new(data.Id, hop));
-
-            // Hop.Current = hop;
-            // data.SetCustomProperty("hop_id", hop);
             HopExportProcessorEventSource.Log.Stuff($"Start hop {hop.HopId}: {reason} {data.DisplayName}");
         }
         else if (this.hops.TryGetValue(data.ParentId, out var hopEntry))
         {
+            var hop = hopEntry.Value;
             this.hops.TryAdd(data.Id, hopEntry);
+            HopExportProcessorEventSource.Log.Stuff($"Span started {hop.HopId}: {data.DisplayName}");
         }
         else
         {
-            HopExportProcessorEventSource.Log.Stuff($"Nothing is going to happen {data.DisplayName}");
+            HopExportProcessorEventSource.Log.Stuff($"OnStart no hop {data.DisplayName}");
         }
-
-        // if (!Hop.Current.IsValid && data.Parent != null)
-        // {
-        //     hop = data.Parent.GetCustomProperty("hop_id") as Hop;
-        //     if (hop != null)
-        //     {
-        //         Hop.Current = hop;
-        //         data.SetCustomProperty("hop_id", hop);
-        //     }
-        // }
-
-        HopExportProcessorEventSource.Log.Stuff($"Span started {Hop.Current.HopId}: {data.DisplayName}");
     }
 
     /// <inheritdoc />
     protected override void OnExport(Activity data)
     {
-        // var hop = Hop.Current.IsValid
-        //     ? Hop.Current
-        //     : data.GetCustomProperty("hop_id") as IHop;
-
         var hopFound = this.hops.TryGetValue(data.Id, out var hopEntry);
-        var hop = hopFound ? hopEntry.Value : new NoopHop();
-
-        if (hopFound && hop.SpanEnd(data))
+        if (hopFound)
         {
-            var spans = hop.Spans;
-            using var batch = new Batch<Activity>(spans, spans.Length);
-
-            lock (this.mutex)
+            var hop = hopEntry.Value;
+            if (hop.SpanEnd(data))
             {
-                var result = this.exporter.Export(batch);
+                var spans = hop.Spans;
+                using var batch = new Batch<Activity>(spans, spans.Length);
+                lock (this.mutex)
+                {
+                    var result = this.exporter.Export(batch);
+                }
+
+                foreach (var span in spans)
+                {
+                    this.hops.TryRemove(span.Id, out var _);
+                }
+
+                HopExportProcessorEventSource.Log.Stuff($"End hop {hop.HopId}: Count={spans.Length}");
             }
-
-            HopExportProcessorEventSource.Log.Stuff($"End hop {hop.HopId}: Count={spans.Length}");
+            else
+            {
+                HopExportProcessorEventSource.Log.Stuff($"Span ended {hop.HopId}: {data.DisplayName}");
+            }
         }
-
-        HopExportProcessorEventSource.Log.Stuff($"Span ended {hop.HopId}: {data.DisplayName}");
+        else
+        {
+            HopExportProcessorEventSource.Log.Stuff($"OnEnd no hop {data.DisplayName}");
+        }
     }
 
     private void SetExporterParentProvider()
