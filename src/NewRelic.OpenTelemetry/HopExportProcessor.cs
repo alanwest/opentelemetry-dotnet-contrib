@@ -93,20 +93,9 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
 
     private void ExporterProc()
     {
-        var triggers = Array.Empty<WaitHandle>();
-
         while (true)
         {
-            try
-            {
-                WaitHandle.WaitAny(triggers, this.scheduledDelayMilliseconds);
-            }
-            catch (ObjectDisposedException)
-            {
-                // the exporter is somehow disposed before the worker thread could finish its job
-                return;
-            }
-
+            Thread.Sleep(this.scheduledDelayMilliseconds);
             foreach (var hopEntry in this.hops.ToArray())
             {
                 var hop = hopEntry.Value.Value;
