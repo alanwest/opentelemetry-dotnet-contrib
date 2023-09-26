@@ -45,19 +45,17 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
 
         if (data.IsHopStart(out var reason))
         {
-            var hop = new Hop();
-            this.hops.TryAdd(data.Id, new(data.Id, hop));
+            this.hops.TryAdd(data.Id, new(data.Id, new Hop()));
             HopExportProcessorEventSource.Log.Stuff($"Start hop {data.Id}: {reason} {data.DisplayName}");
         }
         else if (this.hops.TryGetValue(data.ParentId, out var hopEntry))
         {
-            var hop = hopEntry.Value;
             this.hops.TryAdd(data.Id, hopEntry);
             HopExportProcessorEventSource.Log.Stuff($"Span started {data.Id}: {data.DisplayName}");
         }
         else
         {
-            HopExportProcessorEventSource.Log.Stuff($"OnStart no hop RootId={data.RootId} ParentId={data.ParentId}, ParentSpanId={data.ParentSpanId}, Parent={data.Parent}, Context.SpanId={data.Context.SpanId}, SpanId={data.SpanId}, DisplayName={data.DisplayName}");
+            HopExportProcessorEventSource.Log.Stuff($"OnStart no hop ParentId={data.ParentId}, ParentSpanId={data.ParentSpanId}, Id={data.Id}, SpanId={data.SpanId}, DisplayName={data.DisplayName}");
         }
     }
 
