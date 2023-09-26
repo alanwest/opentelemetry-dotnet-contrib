@@ -18,28 +18,56 @@ using System.Diagnostics;
 
 namespace NewRelic.OpenTelemetry;
 
-internal sealed class Hop : IHop
+internal sealed class Hop
 {
-    private static readonly IHop Noop = new NoopHop();
-    private static readonly AsyncLocal<IHop> CurrentPrivate = new AsyncLocal<IHop>();
-
+    private object mutex = new object();
+    private bool ended;
+    private int spanCount = 1;
+    private DateTime deadline;
     private List<Activity> spans = new List<Activity>();
 
-    public static IHop Current
+    public Hop(Activity rootActivity)
     {
-        get => CurrentPrivate.Value ?? Noop;
-        set => CurrentPrivate.Value = value != null ? value : Noop;
+        this.spans.Add(rootActivity);
     }
 
-    public int HopId => this.GetHashCode();
-
-    public bool IsValid => true;
-
-    public Activity[] Spans => this.spans.ToArray();
-
-    public bool SpanEnd(Activity activity)
+    public void SpanStart(Activity activity)
     {
-        this.spans.Add(activity);
-        return activity.IsHopStart(out var _);
+        lock (this.mutex)
+        {
+            if (!this.ended)
+            {
+                ++this.spanCount;
+                this.spans.Add(activity);
+            }
+        }
+    }
+
+    public void SpanEnd(Activity activity)
+    {
+        lock (this.mutex)
+        {
+            --this.spanCount;
+            if (this.spanCount == 0)
+            {
+                this.deadline = DateTime.UtcNow.AddSeconds(5);
+            }
+        }
+    }
+
+    public bool TryFinish(out Activity[] spans)
+    {
+        lock (this.mutex)
+        {
+            if (this.spanCount == 0 && this.deadline < DateTime.UtcNow)
+            {
+                this.ended = true;
+                spans = this.spans.ToArray();
+                return true;
+            }
+
+            spans = Array.Empty<Activity>();
+            return false;
+        }
     }
 }

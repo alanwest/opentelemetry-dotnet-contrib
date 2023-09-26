@@ -25,9 +25,12 @@ namespace NewRelic.OpenTelemetry;
 /// </summary>
 public class HopExportProcessor : BaseExportProcessor<Activity>
 {
-    private static ConcurrentDictionary<string, KeyValuePair<string, IHop>> hops = new();
+    internal const int DefaultScheduledDelayMilliseconds = 5000;
+    internal const int DefaultExporterTimeoutMilliseconds = 30000;
 
-    private readonly object mutex = new();
+    private readonly ConcurrentDictionary<string, KeyValuePair<string, Hop>> hops = new();
+    private readonly Thread exporterThread;
+    private readonly int scheduledDelayMilliseconds;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HopExportProcessor"/> class.
@@ -36,6 +39,13 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     public HopExportProcessor(BaseExporter<Activity> exporter)
         : base(exporter)
     {
+        this.scheduledDelayMilliseconds = DefaultScheduledDelayMilliseconds;
+        this.exporterThread = new Thread(this.ExporterProc)
+        {
+            IsBackground = true,
+            Name = $"OpenTelemetry-{nameof(HopExportProcessor)}-{exporter.GetType().Name}",
+        };
+        this.exporterThread.Start();
     }
 
     /// <inheritdoc />
@@ -45,12 +55,13 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
 
         if (data.IsHopStart(out var reason))
         {
-            hops.TryAdd(data.Id, new(data.Id, new Hop()));
+            this.hops.TryAdd(data.Id, new(data.Id, new Hop(data)));
             HopExportProcessorEventSource.Log.Stuff($"Root span started {data.Id}: {reason} {data.DisplayName}");
         }
-        else if (hops.TryGetValue(data.ParentId, out var hopEntry))
+        else if (this.hops.TryGetValue(data.ParentId, out var hopEntry))
         {
-            hops.TryAdd(data.Id, hopEntry);
+            hopEntry.Value.SpanStart(data);
+            this.hops.TryAdd(data.Id, hopEntry);
             HopExportProcessorEventSource.Log.Stuff($"Span started {data.Id}: {data.DisplayName}");
         }
         else
@@ -60,36 +71,58 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     }
 
     /// <inheritdoc />
-    protected override void OnExport(Activity data)
+    public override void OnEnd(Activity data)
     {
-        var hopFound = hops.TryGetValue(data.Id, out var hopEntry);
+        var hopFound = this.hops.TryGetValue(data.Id, out var hopEntry);
         if (hopFound)
         {
             var hop = hopEntry.Value;
-            if (hop.SpanEnd(data))
-            {
-                var spans = hop.Spans;
-                using var batch = new Batch<Activity>(spans, spans.Length);
-                lock (this.mutex)
-                {
-                    var result = this.exporter.Export(batch);
-                }
-
-                foreach (var span in spans)
-                {
-                    hops.TryRemove(span.Id, out var _);
-                }
-
-                HopExportProcessorEventSource.Log.Stuff($"Root span ended {data.Id}: Count={spans.Length}");
-            }
-            else
-            {
-                HopExportProcessorEventSource.Log.Stuff($"Span ended {data.Id}: {data.DisplayName}");
-            }
+            hop.SpanEnd(data);
+            HopExportProcessorEventSource.Log.Stuff($"Span ended {data.Id}: {data.DisplayName}");
         }
         else
         {
             HopExportProcessorEventSource.Log.Stuff($"OnEnd no hop ParentId={data.ParentId}, ParentSpanId={data.ParentSpanId}, Id={data.Id}, SpanId={data.SpanId}, DisplayName={data.DisplayName}");
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void OnExport(Activity data)
+    {
+    }
+
+    private void ExporterProc()
+    {
+        var triggers = Array.Empty<WaitHandle>();
+
+        while (true)
+        {
+            try
+            {
+                WaitHandle.WaitAny(triggers, this.scheduledDelayMilliseconds);
+            }
+            catch (ObjectDisposedException)
+            {
+                // the exporter is somehow disposed before the worker thread could finish its job
+                return;
+            }
+
+            foreach (var hopEntry in this.hops.ToArray())
+            {
+                var hop = hopEntry.Value.Value;
+                if (hop.TryFinish(out var spans))
+                {
+                    foreach (var span in spans)
+                    {
+                        this.hops.TryRemove(span.Id, out var _);
+                    }
+
+                    using var batch = new Batch<Activity>(spans, spans.Length);
+                    var result = this.exporter.Export(batch);
+
+                    HopExportProcessorEventSource.Log.Stuff($"Export batch {spans[0].Id}: {spans.Length} span(s)");
+                }
+            }
         }
     }
 
