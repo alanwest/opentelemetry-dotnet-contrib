@@ -25,9 +25,9 @@ namespace NewRelic.OpenTelemetry;
 /// </summary>
 public class HopExportProcessor : BaseExportProcessor<Activity>
 {
-    private readonly object mutex = new();
+    private static ConcurrentDictionary<string, KeyValuePair<string, IHop>> hops = new();
 
-    private ConcurrentDictionary<string, KeyValuePair<string, IHop>> hops = new();
+    private readonly object mutex = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HopExportProcessor"/> class.
@@ -45,12 +45,12 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
 
         if (data.IsHopStart(out var reason))
         {
-            this.hops.TryAdd(data.Id, new(data.Id, new Hop()));
+            hops.TryAdd(data.Id, new(data.Id, new Hop()));
             HopExportProcessorEventSource.Log.Stuff($"Start hop {data.Id}: {reason} {data.DisplayName}");
         }
-        else if (this.hops.TryGetValue(data.ParentId, out var hopEntry))
+        else if (hops.TryGetValue(data.ParentId, out var hopEntry))
         {
-            this.hops.TryAdd(data.Id, hopEntry);
+            hops.TryAdd(data.Id, hopEntry);
             HopExportProcessorEventSource.Log.Stuff($"Span started {data.Id}: {data.DisplayName}");
         }
         else
@@ -62,7 +62,7 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     /// <inheritdoc />
     protected override void OnExport(Activity data)
     {
-        var hopFound = this.hops.TryGetValue(data.Id, out var hopEntry);
+        var hopFound = hops.TryGetValue(data.Id, out var hopEntry);
         if (hopFound)
         {
             var hop = hopEntry.Value;
@@ -77,7 +77,7 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
 
                 foreach (var span in spans)
                 {
-                    this.hops.TryRemove(span.Id, out var _);
+                    hops.TryRemove(span.Id, out var _);
                 }
 
                 HopExportProcessorEventSource.Log.Stuff($"End hop {hop.HopId}: Count={spans.Length}");
