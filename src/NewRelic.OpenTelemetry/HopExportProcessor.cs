@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using OpenTelemetry;
 
@@ -25,6 +26,8 @@ namespace NewRelic.OpenTelemetry;
 public class HopExportProcessor : BaseExportProcessor<Activity>
 {
     private readonly object mutex = new();
+
+    private ConcurrentDictionary<string, KeyValuePair<string, IHop>> hops = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HopExportProcessor"/> class.
@@ -45,20 +48,30 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
         if (data.IsHopStart(out var reason))
         {
             hop = new Hop();
-            Hop.Current = hop;
-            data.SetCustomProperty("hop_id", hop);
+            this.hops.TryAdd(data.Id, new(data.Id, hop));
+
+            // Hop.Current = hop;
+            // data.SetCustomProperty("hop_id", hop);
             HopExportProcessorEventSource.Log.Stuff($"Start hop {hop.HopId}: {reason} {data.DisplayName}");
         }
-
-        if (!Hop.Current.IsValid && data.Parent != null)
+        else if (this.hops.TryGetValue(data.ParentId, out var hopEntry))
         {
-            hop = data.Parent.GetCustomProperty("hop_id") as Hop;
-            if (hop != null)
-            {
-                Hop.Current = hop;
-                data.SetCustomProperty("hop_id", hop);
-            }
+            this.hops.TryAdd(data.Id, hopEntry);
         }
+        else
+        {
+            HopExportProcessorEventSource.Log.Stuff($"Nothing is going to happen {data.DisplayName}");
+        }
+
+        // if (!Hop.Current.IsValid && data.Parent != null)
+        // {
+        //     hop = data.Parent.GetCustomProperty("hop_id") as Hop;
+        //     if (hop != null)
+        //     {
+        //         Hop.Current = hop;
+        //         data.SetCustomProperty("hop_id", hop);
+        //     }
+        // }
 
         HopExportProcessorEventSource.Log.Stuff($"Span started {Hop.Current.HopId}: {data.DisplayName}");
     }
@@ -66,11 +79,14 @@ public class HopExportProcessor : BaseExportProcessor<Activity>
     /// <inheritdoc />
     protected override void OnExport(Activity data)
     {
-        var hop = Hop.Current.IsValid
-            ? Hop.Current
-            : data.GetCustomProperty("hop_id") as IHop;
+        // var hop = Hop.Current.IsValid
+        //     ? Hop.Current
+        //     : data.GetCustomProperty("hop_id") as IHop;
 
-        if (hop != null && hop.SpanEnd(data))
+        var hopFound = this.hops.TryGetValue(data.Id, out var hopEntry);
+        var hop = hopFound ? hopEntry.Value : new NoopHop();
+
+        if (hopFound && hop.SpanEnd(data))
         {
             var spans = hop.Spans;
             using var batch = new Batch<Activity>(spans, spans.Length);
