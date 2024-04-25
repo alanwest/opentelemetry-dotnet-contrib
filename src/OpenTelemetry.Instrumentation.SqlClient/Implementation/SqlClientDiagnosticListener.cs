@@ -94,10 +94,16 @@ internal sealed class SqlClientDiagnosticListener : ListenerHandler
                         _ = this.connectionFetcher.TryFetch(command, out var connection);
                         _ = this.databaseFetcher.TryFetch(connection, out var database);
 
-                        activity.DisplayName = (string)database;
-
                         _ = this.dataSourceFetcher.TryFetch(connection, out var dataSource);
                         _ = this.commandTextFetcher.TryFetch(command, out var commandText);
+
+                        if (Environment.GetEnvironmentVariable("BEEP") == "BOOP")
+                        {
+                            
+                            return;
+                        }
+
+                        activity.DisplayName = (string)database;
 
                         activity.SetTag(SemanticConventions.AttributeDbName, (string)database);
 

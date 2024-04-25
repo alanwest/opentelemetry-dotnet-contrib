@@ -3,7 +3,10 @@
 
 using System.Data;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using DotNet.Testcontainers.Containers;
 using Microsoft.Data.SqlClient;
 using OpenTelemetry.Tests;
@@ -27,6 +30,42 @@ public sealed class SqlClientIntegrationTests : IAsyncLifetime
     public Task DisposeAsync()
     {
         return this.databaseContainer.DisposeAsync().AsTask();
+    }
+
+    [Fact]
+    public void AnotherTest()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var b = assembly.GetManifestResourceStream("Test.sql")!;
+
+        string script = string.Empty;
+        using (var streamReader = new StreamReader(b))
+        {
+            script = streamReader.ReadToEnd();
+        }
+
+        var commands = Regex.Split(script, @"^\b*GO\b*$", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+
+        using (var connection = new SqlConnection(this.GetConnectionString()))
+        {
+            connection.Open();
+            foreach (string commandText in commands)
+            {
+                if (!string.IsNullOrWhiteSpace(commandText.Trim()))
+                {
+                    using (var command = new SqlCommand(commandText, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            using (var command = new SqlCommand("SELECT * FROM NosePicker", connection))
+            {
+                var reader = command.ExecuteReader();
+                var value = reader.GetValue(1);
+            }
+        }
     }
 
     [Trait("CategoryName", "SqlIntegrationTests")]

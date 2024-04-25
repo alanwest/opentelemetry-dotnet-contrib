@@ -45,6 +45,11 @@ internal static class SemanticConventions
     public const string AttributeHttpResponseContentLengthUncompressed = "http.response_content_length_uncompressed";
 
     public const string AttributeDbSystem = "db.system";
+    public const string AttributeDbCollectionName = "db.collection.name";
+    public const string AttributeDbNamespace = "db.namespace";
+    public const string AttributeDbOperationName = "db.operation.name";
+    public const string AttributeDbInstanceId = "db.instance.id";
+
     public const string AttributeDbConnectionString = "db.connection_string";
     public const string AttributeDbUser = "db.user";
     public const string AttributeDbMsSqlInstanceName = "db.mssql.instance_name";
