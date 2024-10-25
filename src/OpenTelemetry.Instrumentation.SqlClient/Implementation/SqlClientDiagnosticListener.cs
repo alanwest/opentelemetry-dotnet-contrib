@@ -34,10 +34,13 @@ internal sealed class SqlClientDiagnosticListener : ListenerHandler
     private readonly PropertyFetcher<Exception> exceptionFetcher = new("Exception");
     private readonly SqlClientTraceInstrumentationOptions options;
 
+    private readonly SqlProcessor sqlProcessor;
+
     public SqlClientDiagnosticListener(string sourceName, SqlClientTraceInstrumentationOptions? options)
         : base(sourceName)
     {
         this.options = options ?? new SqlClientTraceInstrumentationOptions();
+        this.sqlProcessor = new SqlProcessor(this.options.EnableSqlSanitization, this.options.EnableSqlParsing);
     }
 
     public override bool SupportsNullActivity => true;
@@ -121,42 +124,62 @@ internal sealed class SqlClientDiagnosticListener : ListenerHandler
 
                         if (this.commandTypeFetcher.TryFetch(command, out CommandType commandType))
                         {
-                            switch (commandType)
+                            var info = !string.IsNullOrEmpty(commandText as string)
+                                ? this.sqlProcessor.Parse(commandType, (string)commandText!)
+                                : (QueryText: null, OperationName: null, CollectionName: null);
+
+                            if (this.options.EmitNewAttributes)
                             {
-                                case CommandType.StoredProcedure:
-                                    if (this.options.SetDbStatementForStoredProcedure)
-                                    {
-                                        if (this.options.EmitOldAttributes)
+                                if (info.OperationName != null)
+                                {
+                                    activity.SetTag(SemanticConventions.AttributeDbOperationName, info.OperationName);
+                                }
+
+                                if (info.CollectionName != null)
+                                {
+                                    activity.SetTag(SemanticConventions.AttributeDbCollectionName, info.CollectionName);
+                                }
+                            }
+
+                            if (info.QueryText != null)
+                            {
+                                switch (commandType)
+                                {
+                                    case CommandType.StoredProcedure:
+                                        if (this.options.SetDbStatementForStoredProcedure)
                                         {
-                                            activity.SetTag(SemanticConventions.AttributeDbStatement, commandText);
+                                            if (this.options.EmitOldAttributes)
+                                            {
+                                                activity.SetTag(SemanticConventions.AttributeDbStatement, info.QueryText);
+                                            }
+
+                                            if (this.options.EmitNewAttributes)
+                                            {
+                                                activity.SetTag(SemanticConventions.AttributeDbQueryText, info.QueryText);
+                                            }
                                         }
 
-                                        if (this.options.EmitNewAttributes)
+                                        break;
+
+                                    case CommandType.Text:
+                                        if (this.options.SetDbStatementForText)
                                         {
-                                            activity.SetTag(SemanticConventions.AttributeDbQueryText, commandText);
-                                        }
-                                    }
+                                            if (this.options.EmitOldAttributes)
+                                            {
+                                                activity.SetTag(SemanticConventions.AttributeDbStatement, info.QueryText);
+                                            }
 
-                                    break;
-
-                                case CommandType.Text:
-                                    if (this.options.SetDbStatementForText)
-                                    {
-                                        if (this.options.EmitOldAttributes)
-                                        {
-                                            activity.SetTag(SemanticConventions.AttributeDbStatement, commandText);
+                                            if (this.options.EmitNewAttributes)
+                                            {
+                                                activity.SetTag(SemanticConventions.AttributeDbQueryText, info.QueryText);
+                                            }
                                         }
 
-                                        if (this.options.EmitNewAttributes)
-                                        {
-                                            activity.SetTag(SemanticConventions.AttributeDbQueryText, commandText);
-                                        }
-                                    }
+                                        break;
 
-                                    break;
-
-                                case CommandType.TableDirect:
-                                    break;
+                                    case CommandType.TableDirect:
+                                        break;
+                                }
                             }
                         }
 

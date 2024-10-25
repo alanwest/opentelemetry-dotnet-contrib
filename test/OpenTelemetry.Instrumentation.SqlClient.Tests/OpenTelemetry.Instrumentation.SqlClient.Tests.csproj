@@ -31,4 +31,13 @@
     <ProjectReference Include="$(RepoRoot)\src\OpenTelemetry.Instrumentation.SqlClient\OpenTelemetry.Instrumentation.SqlClient.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="SqlObfuscatorTestCases.json">
+      <LogicalName>SqlObfuscatorTestCases.json</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SqlParserTestCases.json">
+      <LogicalName>SqlParserTestCases.json</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

@@ -33,6 +33,18 @@ public class SqlClientTraceInstrumentationOptions
     }
 
     /// <summary>
+    /// Gets or sets a value indicating whether to sanitize collected SQL
+    /// statements to remove potentially sensitive information.
+    /// </summary>
+    public bool EnableSqlSanitization { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to enable parsing of CommandText
+    /// to populate db.operation.name and db.collection.name attributes.
+    /// </summary>
+    public bool EnableSqlParsing { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether or not the <see
     /// cref="SqlClientInstrumentation"/> should add the names of <see
     /// cref="CommandType.StoredProcedure"/> commands as the <see
