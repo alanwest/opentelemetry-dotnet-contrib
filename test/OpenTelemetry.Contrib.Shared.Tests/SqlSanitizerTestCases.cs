@@ -61,11 +61,11 @@ internal static class SqlSanitizerTestCases
 
         public string Name { get; set; } = string.Empty;
 
-        public IEnumerable<string> Dialects { get; set; } = [];
-
         public string Sql { get; set; } = string.Empty;
 
-        public IEnumerable<string> Sanitized { get; set; } = [];
+        public string Sanitized { get; set; } = string.Empty;
+
+        public IEnumerable<string> Dialects { get; set; } = [];
 
         public override string ToString()
         {

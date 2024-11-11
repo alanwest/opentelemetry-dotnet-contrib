@@ -1,115 +1,95 @@
 [
   {
     "name": "back_quoted_identifiers.mysql",
-    "sanitized": [
-      "SELECT `t001`.`c2` FROM `t001` WHERE `t001`.`c2` = ? AND c3=? LIMIT ?"
-    ],
+    "sql": "SELECT `t001`.`c2` FROM `t001` WHERE `t001`.`c2` = 'value' AND c3=\"othervalue\" LIMIT ?",
+    "sanitized": "SELECT `t001`.`c2` FROM `t001` WHERE `t001`.`c2` = ? AND c3=? LIMIT ?",
     "dialects": [
       "mysql"
-    ],
-    "sql": "SELECT `t001`.`c2` FROM `t001` WHERE `t001`.`c2` = 'value' AND c3=\"othervalue\" LIMIT ?"
+    ]
   },
   {
     "name": "comment_delimiters_in_double_quoted_strings",
-    "sanitized": [
-      "SELECT * FROM t WHERE foo=? AND baz=?"
-    ],
+    "sql": "SELECT * FROM t WHERE foo=\"bar/*\" AND baz=\"whatever */qux\"",
+    "sanitized": "SELECT * FROM t WHERE foo=? AND baz=?",
     "dialects": [
       "mssql",
       "mysql"
-    ],
-    "sql": "SELECT * FROM t WHERE foo=\"bar/*\" AND baz=\"whatever */qux\""
+    ]
   },
   {
     "name": "comment_delimiters_in_single_quoted_strings",
-    "sanitized": [
-      "SELECT * FROM t WHERE foo=? AND baz=?"
-    ],
+    "sql": "SELECT * FROM t WHERE foo='bar/*' AND baz='whatever */qux'",
+    "sanitized": "SELECT * FROM t WHERE foo=? AND baz=?",
     "dialects": [
       "mssql",
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sql": "SELECT * FROM t WHERE foo='bar/*' AND baz='whatever */qux'"
+    ]
   },
   {
     "name": "double_quoted_identifiers.postgres",
-    "sanitized": [
-      "SELECT \"t001\".\"c2\" FROM \"t001\" WHERE \"t001\".\"c2\" = ? AND c3=? LIMIT ?"
-    ],
+    "sql": "SELECT \"t001\".\"c2\" FROM \"t001\" WHERE \"t001\".\"c2\" = 'value' AND c3=1234 LIMIT 1",
+    "sanitized": "SELECT \"t001\".\"c2\" FROM \"t001\" WHERE \"t001\".\"c2\" = ? AND c3=? LIMIT ?",
     "dialects": [
       "postgres",
       "oracle"
-    ],
-    "sql": "SELECT \"t001\".\"c2\" FROM \"t001\" WHERE \"t001\".\"c2\" = 'value' AND c3=1234 LIMIT 1"
+    ]
   },
   {
     "name": "end_of_line_comment_in_double_quoted_string",
-    "sanitized": [
-      "SELECT * FROM t WHERE foo=? AND\n  baz=?"
-    ],
+    "sql": "SELECT * FROM t WHERE foo=\"bar--\" AND\n  baz=\"qux--\"",
+    "sanitized": "SELECT * FROM t WHERE foo=? AND\n  baz=?",
     "dialects": [
       "mssql",
       "mysql"
-    ],
-    "sql": "SELECT * FROM t WHERE foo=\"bar--\" AND\n  baz=\"qux--\""
+    ]
   },
   {
     "name": "end_of_line_comment_in_single_quoted_string",
-    "sanitized": [
-      "SELECT * FROM t WHERE foo=? AND\n  baz=?"
-    ],
+    "sql": "SELECT * FROM t WHERE foo='bar--' AND\n  baz='qux--'",
+    "sanitized": "SELECT * FROM t WHERE foo=? AND\n  baz=?",
     "dialects": [
       "mssql",
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sql": "SELECT * FROM t WHERE foo='bar--' AND\n  baz='qux--'"
+    ]
   },
   {
     "name": "end_of_query_comment_cstyle",
-    "sanitized": [
-      "SELECT * FROM foo WHERE bar=? ?"
-    ],
+    "sql": "SELECT * FROM foo WHERE bar='baz' /* Hide Me */",
+    "sanitized": "SELECT * FROM foo WHERE bar=? ?",
     "dialects": [
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sql": "SELECT * FROM foo WHERE bar='baz' /* Hide Me */"
+    ]
   },
   {
     "name": "end_of_query_comment_doubledash",
-    "sanitized": [
-      "SELECT * FROM foobar WHERE password=?\n?"
-    ],
+    "sql": "SELECT * FROM foobar WHERE password='hunter2'\n-- No peeking!",
+    "sanitized": "SELECT * FROM foobar WHERE password=?\n?",
     "dialects": [
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sql": "SELECT * FROM foobar WHERE password='hunter2'\n-- No peeking!"
+    ]
   },
   {
     "name": "end_of_query_comment_hash",
-    "sanitized": [
-      "SELECT foo, bar FROM baz WHERE password=? ?"
-    ],
+    "sql": "SELECT foo, bar FROM baz WHERE password='hunter2' # Secret",
+    "sanitized": "SELECT foo, bar FROM baz WHERE password=? ?",
     "dialects": [
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sql": "SELECT foo, bar FROM baz WHERE password='hunter2' # Secret"
+    ]
   },
   {
     "name": "escape_string_constants.postgres",
     "sql": "SELECT \"col1\", \"col2\" from \"table\" WHERE \"col3\"=E'foo\\'bar\\\\baz' AND country=e'foo\\'bar\\\\baz'",
-    "sanitized": [
-      "SELECT \"col1\", \"col2\" from \"table\" WHERE \"col3\"=E?"
-    ],
+    "sanitized": "SELECT \"col1\", \"col2\" from \"table\" WHERE \"col3\"=E?",
     "dialects": [
       "postgres"
     ],
@@ -121,33 +101,27 @@
   },
   {
     "name": "multiple_literal_types.mysql",
-    "sanitized": [
-      "INSERT INTO `X` values(?,?, ? , ?, ?)"
-    ],
+    "sql": "INSERT INTO `X` values(\"test\",0, 1 , 2, 'test')",
+    "sanitized": "INSERT INTO `X` values(?,?, ? , ?, ?)",
     "dialects": [
       "mysql"
-    ],
-    "sql": "INSERT INTO `X` values(\"test\",0, 1 , 2, 'test')"
+    ]
   },
   {
     "name": "numbers_in_identifiers",
-    "sanitized": [
-      "SELECT c11.col1, c22.col2 FROM table c11, table c22 WHERE value=?"
-    ],
+    "sql": "SELECT c11.col1, c22.col2 FROM table c11, table c22 WHERE value='nothing'",
+    "sanitized": "SELECT c11.col1, c22.col2 FROM table c11, table c22 WHERE value=?",
     "dialects": [
       "mssql",
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sql": "SELECT c11.col1, c22.col2 FROM table c11, table c22 WHERE value='nothing'"
+    ]
   },
   {
     "name": "numeric_literals",
     "sql": "INSERT INTO X VALUES(1, 23456, 123.456, 99+100)",
-    "sanitized": [
-      "INSERT INTO X VALUES(?, ?, ?, ?+?)"
-    ],
+    "sanitized": "INSERT INTO X VALUES(?, ?, ?, ?+?)",
     "dialects": [
       "mssql",
       "mysql",
@@ -157,39 +131,33 @@
   },
   {
     "name": "string_double_quoted.mysql",
-    "sanitized": [
-      "SELECT * FROM table WHERE name=? AND value=?"
-    ],
+    "sql": "SELECT * FROM table WHERE name=\"foo\" AND value=\"don't\"",
+    "sanitized": "SELECT * FROM table WHERE name=? AND value=?",
     "dialects": [
       "mysql"
-    ],
-    "sql": "SELECT * FROM table WHERE name=\"foo\" AND value=\"don't\""
+    ]
   },
   {
     "name": "string_single_quoted",
-    "sanitized": [
-      "SELECT * FROM table WHERE name=? AND value = ?"
-    ],
+    "sql": "SELECT * FROM table WHERE name='foo' AND value = 'bar'",
+    "sanitized": "SELECT * FROM table WHERE name=? AND value = ?",
     "dialects": [
       "mssql",
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sql": "SELECT * FROM table WHERE name='foo' AND value = 'bar'"
+    ]
   },
   {
     "name": "string_with_backslash_and_twin_single_quotes",
-    "sanitized": [
-      "SELECT * FROM table WHERE col=?"
-    ],
+    "sql": "SELECT * FROM table WHERE col='foo\\''bar'",
+    "sanitized": "SELECT * FROM table WHERE col=?",
     "dialects": [
       "mssql",
       "mysql",
       "postgres",
       "oracle"
     ],
-    "sql": "SELECT * FROM table WHERE col='foo\\''bar'",
     "comments": [
       "If backslashes are being ignored in single-quoted strings",
       "(standard_conforming_strings=on in PostgreSQL, or NO_BACKSLASH_ESCAPES is on",
@@ -198,46 +166,38 @@
   },
   {
     "name": "string_with_embedded_double_quote",
-    "sanitized": [
-      "SELECT * FROM table WHERE col1=? AND col2=?"
-    ],
+    "sql": "SELECT * FROM table WHERE col1='foo\"bar' AND col2='what\"ever'",
+    "sanitized": "SELECT * FROM table WHERE col1=? AND col2=?",
     "dialects": [
       "mssql",
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sql": "SELECT * FROM table WHERE col1='foo\"bar' AND col2='what\"ever'"
+    ]
   },
   {
     "name": "string_with_embedded_newline",
-    "sanitized": [
-      "select * from accounts where accounts.name != ? order by accounts.name"
-    ],
+    "sql": "select * from accounts where accounts.name != 'dude \n newline' order by accounts.name",
+    "sanitized": "select * from accounts where accounts.name != ? order by accounts.name",
     "dialects": [
       "mssql",
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sql": "select * from accounts where accounts.name != 'dude \n newline' order by accounts.name"
+    ]
   },
   {
     "name": "string_with_embedded_single_quote.mysql",
-    "sanitized": [
-      "SELECT * FROM table WHERE col1=? AND col2=?"
-    ],
+    "sql": "SELECT * FROM table WHERE col1=\"don't\" AND col2=\"won't\"",
+    "sanitized": "SELECT * FROM table WHERE col1=? AND col2=?",
     "dialects": [
       "mysql"
-    ],
-    "sql": "SELECT * FROM table WHERE col1=\"don't\" AND col2=\"won't\""
+    ]
   },
   {
     "name": "string_with_escaped_quotes.mysql",
     "sql": "INSERT INTO X values('', 'jim''s ssn',0, 1 , 'jim''s son''s son', \"\"\"jim''s\"\" hat\", \"\\\"jim''s secret\\\"\")",
-    "sanitized": [
-      "INSERT INTO X values(?, ?,?, ? , ?, ?, ?"
-    ],
+    "sanitized": "INSERT INTO X values(?, ?,?, ? , ?, ?, ?",
     "dialects": [
       "mysql"
     ]
@@ -245,9 +205,7 @@
   {
     "name": "string_with_trailing_backslash",
     "sql": "SELECT * FROM table WHERE name='foo\\' AND color='blue'",
-    "sanitized": [
-      "SELECT * FROM table WHERE name=?"
-    ],
+    "sanitized": "SELECT * FROM table WHERE name=?",
     "dialects": [
       "mssql",
       "mysql",
@@ -262,33 +220,27 @@
   },
   {
     "name": "string_with_trailing_escaped_backslash.mysql",
-    "sanitized": [
-      "SELECT * FROM table WHERE foo=?"
-    ],
+    "sql": "SELECT * FROM table WHERE foo=\"this string ends with a backslash\\\\\"",
+    "sanitized": "SELECT * FROM table WHERE foo=?",
     "dialects": [
       "mysql"
-    ],
-    "sql": "SELECT * FROM table WHERE foo=\"this string ends with a backslash\\\\\""
+    ]
   },
   {
     "name": "string_with_trailing_escaped_backslash_single_quoted",
-    "sanitized": [
-      "SELECT * FROM table WHERE foo=?"
-    ],
+    "sql": "SELECT * FROM table WHERE foo='this string ends with a backslash\\\\'",
+    "sanitized": "SELECT * FROM table WHERE foo=?",
     "dialects": [
       "mssql",
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sql": "SELECT * FROM table WHERE foo='this string ends with a backslash\\\\'"
+    ]
   },
   {
     "name": "string_with_trailing_escaped_quote",
     "sql": "SELECT * FROM table WHERE name='foo\\'' AND color='blue'",
-    "sanitized": [
-      "SELECT * FROM table WHERE name=?"
-    ],
+    "sanitized": "SELECT * FROM table WHERE name=?",
     "dialects": [
       "mysql",
       "postgres",
@@ -297,23 +249,19 @@
   },
   {
     "name": "string_with_twin_single_quotes",
-    "sanitized": [
-      "INSERT INTO X values(?, ?,?, ? , ?)"
-    ],
+    "sql": "INSERT INTO X values('', 'a''b c',0, 1 , 'd''e f''s h')",
+    "sanitized": "INSERT INTO X values(?, ?,?, ? , ?)",
     "dialects": [
       "mssql",
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sql": "INSERT INTO X values('', 'a''b c',0, 1 , 'd''e f''s h')"
+    ]
   },
   {
     "name": "pathological/end_of_line_comments_with_quotes",
     "sql": "SELECT * FROM t WHERE -- '\n  bar='baz' -- '",
-    "sanitized": [
-      "SELECT * FROM t WHERE ?\n  bar=? ?"
-    ],
+    "sanitized": "SELECT * FROM t WHERE ?\n  bar=? ?",
     "dialects": [
       "mysql",
       "postgres",
@@ -324,9 +272,7 @@
   {
     "name": "pathological/mixed_comments_and_quotes",
     "sql": "SELECT * FROM t WHERE /* ' */ \n  bar='baz' -- '",
-    "sanitized": [
-      "SELECT * FROM t WHERE ? \n  bar=? ?"
-    ],
+    "sanitized": "SELECT * FROM t WHERE ? \n  bar=? ?",
     "dialects": [
       "mysql",
       "postgres",
@@ -337,9 +283,7 @@
   {
     "name": "pathological/mixed_quotes_comments_and_newlines",
     "sql": "SELECT * FROM t WHERE -- '\n  /* ' */ c2='xxx' /* ' */\n  c='x\n  xx' -- '",
-    "sanitized": [
-      "SELECT * FROM t WHERE ?\n  ? c2=? ?\n  c=? ?"
-    ],
+    "sanitized": "SELECT * FROM t WHERE ?\n  ? c2=? ?\n  c=? ?",
     "dialects": [
       "mysql",
       "postgres",
@@ -350,9 +294,7 @@
   {
     "name": "pathological/mixed_quotes_end_of_line_comments",
     "sql": "SELECT * FROM t WHERE -- '\n  c='x\n  xx' -- '",
-    "sanitized": [
-      "SELECT * FROM t WHERE ?\n  c=? ?"
-    ],
+    "sanitized": "SELECT * FROM t WHERE ?\n  c=? ?",
     "dialects": [
       "mysql",
       "postgres",
@@ -363,9 +305,7 @@
   {
     "name": "pathological/quote_delimiters_in_comments",
     "sql": "SELECT * FROM foo WHERE col='value1' AND /* don't */ col2='value1' /* won't */",
-    "sanitized": [
-      "SELECT * FROM foo WHERE col=? AND ? col2=? ?"
-    ],
+    "sanitized": "SELECT * FROM foo WHERE col=? AND ? col2=? ?",
     "dialects": [
       "mysql",
       "postgres",
@@ -376,33 +316,27 @@
   {
     "name": "malformed/unterminated_double_quoted_string.mysql",
     "sql": "SELECT * FROM table WHERE foo='bar' AND baz=\"nothing to see here'",
+    "sanitized": "?",
     "dialects": [
       "mysql"
-    ],
-    "sanitized": [
-      "?"
     ],
     "malformed": true
   },
   {
     "name": "malformed/unterminated_single_quoted_string",
     "sql": "SELECT * FROM table WHERE foo='bar' AND baz='nothing to see here",
+    "sanitized": "?",
     "dialects": [
       "mysql",
       "postgres",
       "oracle"
-    ],
-    "sanitized": [
-      "?"
     ],
     "malformed": true
   },
   {
     "name": "dollar_quotes",
     "sql": "SELECT * FROM \"foo\" WHERE \"foo\" = $a$dollar quotes can be $b$nested$b$$a$ and bar = 'baz'",
-    "sanitized": [
-      "SELECT * FROM \"foo\" WHERE \"foo\" = ? and bar = ?"
-    ],
+    "sanitized": "SELECT * FROM \"foo\" WHERE \"foo\" = ? and bar = ?",
     "dialects": [
       "postgres"
     ]
@@ -410,9 +344,7 @@
   {
     "name": "variable_substitution_not_mistaken_for_dollar_quotes",
     "sql": "INSERT INTO \"foo\" (\"bar\", \"baz\", \"qux\") VALUES ($1, $2, $3) RETURNING \"id\"",
-    "sanitized": [
-      "INSERT INTO \"foo\" (\"bar\", \"baz\", \"qux\") VALUES ($?, $?, $?) RETURNING \"id\""
-    ],
+    "sanitized": "INSERT INTO \"foo\" (\"bar\", \"baz\", \"qux\") VALUES ($?, $?, $?) RETURNING \"id\"",
     "dialects": [
       "postgres"
     ]
@@ -420,9 +352,7 @@
   {
     "name": "non_quote_escape",
     "sql": "select * from foo where bar = 'some\\tthing' and baz = 10",
-    "sanitized": [
-      "select * from foo where bar = ? and baz = ?"
-    ],
+    "sanitized": "select * from foo where bar = ? and baz = ?",
     "dialects": [
       "mssql",
       "mysql",
@@ -433,9 +363,7 @@
   {
     "name": "end_of_string_backslash_and_line_comment_with_quite",
     "sql": "select * from users where user = 'user1\\' password = 'hunter 2' -- ->don't count this quote",
-    "sanitized": [
-      "select * from users where user = ?"
-    ],
+    "sanitized": "select * from users where user = ?",
     "dialects": [
       "mysql",
       "postgres",
@@ -446,9 +374,7 @@
   {
     "name": "oracle_bracket_quote",
     "sql": "select * from foo where bar=q'[baz's]' and x=5",
-    "sanitized": [
-      "select * from foo where bar=? and x=?"
-    ],
+    "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "oracle"
     ]
@@ -456,9 +382,7 @@
   {
     "name": "oracle_brace_quote",
     "sql": "select * from foo where bar=q'{baz's}' and x=5",
-    "sanitized": [
-      "select * from foo where bar=? and x=?"
-    ],
+    "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "oracle"
     ]
@@ -466,9 +390,7 @@
   {
     "name": "oracle_angle_quote",
     "sql": "select * from foo where bar=q'<baz's>' and x=5",
-    "sanitized": [
-      "select * from foo where bar=? and x=?"
-    ],
+    "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "oracle"
     ]
@@ -476,9 +398,7 @@
   {
     "name": "oracle_paren_quote",
     "sql": "select * from foo where bar=q'(baz's)' and x=5",
-    "sanitized": [
-      "select * from foo where bar=? and x=?"
-    ],
+    "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "oracle"
     ]
@@ -486,9 +406,7 @@
   {
     "name": "hex_literals",
     "sql": "select * from foo where bar=0x2F and x=5",
-    "sanitized": [
-      "select * from foo where bar=? and x=?"
-    ],
+    "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "mysql"
     ]
@@ -496,9 +414,7 @@
   {
     "name": "exponential_literals",
     "sql": "select * from foo where bar=1.234e-5 and x=5",
-    "sanitized": [
-      "select * from foo where bar=? and x=?"
-    ],
+    "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "mysql",
       "postgres",
@@ -508,9 +424,7 @@
   {
     "name": "negative_integer_literals",
     "sql": "select * from foo where bar=-1.234e-5 and x=-5",
-    "sanitized": [
-      "select * from foo where bar=? and x=?"
-    ],
+    "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "mysql",
       "postgres",
@@ -520,9 +434,7 @@
   {
     "name": "uuid",
     "sql": "select * from foo where bar=01234567-89ab-cdef-0123-456789abcdef and x=5",
-    "sanitized": [
-      "select * from foo where bar=? and x=?"
-    ],
+    "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "postgres"
     ]
@@ -530,9 +442,7 @@
   {
     "name": "uuid_with_braces",
     "sql": "select * from foo where bar={01234567-89ab-cdef-0123-456789abcdef} and x=5",
-    "sanitized": [
-      "select * from foo where bar=? and x=?"
-    ],
+    "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "postgres"
     ]
@@ -540,9 +450,7 @@
   {
     "name": "uuid_no_dashes",
     "sql": "select * from foo where bar=0123456789abcdef0123456789abcdef and x=5",
-    "sanitized": [
-      "select * from foo where bar=? and x=?"
-    ],
+    "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "postgres"
     ]
@@ -550,9 +458,7 @@
   {
     "name": "uuid_random_dashes",
     "sql": "select * from foo where bar={012-345678-9abc-def012345678-9abcdef} and x=5",
-    "sanitized": [
-      "select * from foo where bar=? and x=?"
-    ],
+    "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "postgres"
     ]
@@ -560,9 +466,7 @@
   {
     "name": "booleans",
     "sql": "select * from truestory where bar=true and x=FALSE",
-    "sanitized": [
-      "select * from truestory where bar=? and x=?"
-    ],
+    "sanitized": "select * from truestory where bar=? and x=?",
     "dialects": [
       "mysql",
       "postgres"
@@ -571,9 +475,7 @@
   {
     "name": "in_clause_digits",
     "sql": "select * from foo where bar IN (123, 456, 789)",
-    "sanitized": [
-      "select * from foo where bar IN (?, ?, ?)"
-    ],
+    "sanitized": "select * from foo where bar IN (?, ?, ?)",
     "dialects": [
       "mysql",
       "postgres",
@@ -584,9 +486,7 @@
   {
     "name": "in_clause_strings",
     "sql": "select * from foo where bar IN ('asdf', 'fdsa')",
-    "sanitized": [
-      "select * from foo where bar IN (?, ?)"
-    ],
+    "sanitized": "select * from foo where bar IN (?, ?)",
     "dialects": [
       "mysql",
       "postgres",
