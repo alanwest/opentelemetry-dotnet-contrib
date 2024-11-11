@@ -18,16 +18,17 @@ internal static class SqlSanitizer
     private const string Boolean = "\\b(?:true|false|null)\\b";
     private const string Number = "-?\\b(?:[0-9_]+\\.)?[0-9_]+([eE][+-]?[0-9_]+)?";
 
-    private static readonly Regex AllDialectsRegex = new Regex(string.Join("|", SingleQuote, DoubleQuote, DollarQuote, OracleQuote, Comment, MultilineComment, Uuid, Hex, Boolean, Number), regexOptions);
-    private static readonly Regex AllUnmatchedRegex = new Regex("'|\"|/\\*|\\*/|\\$", regexOptions);
-    private static readonly Regex MySqlDialectRegex = new Regex(string.Join("|", SingleQuote, DoubleQuote, Comment, MultilineComment, Hex, Boolean, Number), regexOptions);
-    private static readonly Regex MySqlUnmatchedRegex = new Regex("'|\"|/\\*|\\*/", regexOptions);
-    private static readonly Regex PostgresDialectRegex = new Regex(string.Join("|", SingleQuote, DollarQuote, Comment, MultilineComment, Uuid, Boolean, Number), regexOptions);
-    private static readonly Regex PostgresUnmatchedRegex = new Regex("'|/\\*|\\*/|\\$(?!\\?)", regexOptions);
-    private static readonly Regex OracleDialectRegex = new Regex(string.Join("|", SingleQuote, OracleQuote, Comment, MultilineComment, Number), regexOptions);
-    private static readonly Regex OracleUnmatedRegex = new Regex("'|/\\*|\\*/", regexOptions);
+    private const string AllUnmatchedPattern = "'|\"|/\\*|\\*/|\\$";
+    private const string MySqlUnmatchedPattern = "'|\"|/\\*|\\*/";
+    private const string PostgresUnmatchedPattern = "'|/\\*|\\*/|\\$(?!\\?)";
+    private const string OracleUnmatedPattern = "'|/\\*|\\*/";
 
-    private static RegexOptions regexOptions = RegexOptions.Multiline | RegexOptions.IgnoreCase | RegexOptions.Compiled;
+    private static readonly string AllDialectsPattern = string.Join("|", SingleQuote, DoubleQuote, DollarQuote, OracleQuote, Comment, MultilineComment, Uuid, Hex, Boolean, Number);
+    private static readonly string MySqlDialectPattern = string.Join("|", SingleQuote, DoubleQuote, Comment, MultilineComment, Hex, Boolean, Number);
+    private static readonly string PostgresDialectPattern = string.Join("|", SingleQuote, DollarQuote, Comment, MultilineComment, Uuid, Boolean, Number);
+    private static readonly string OracleDialectPattern = string.Join("|", SingleQuote, OracleQuote, Comment, MultilineComment, Number);
+
+    private static readonly RegexOptions RegexOptions = RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Compiled;
 
     public static string GetSanitizedSql(string sql, SqlDialect dialect)
     {
@@ -36,21 +37,21 @@ internal static class SqlSanitizer
             return sql ?? string.Empty;
         }
 
-        var sanitizedSql = string.Empty;
+        string sanitizedSql;
         switch (dialect)
         {
             case SqlDialect.MySql:
-                sanitizedSql = MySqlDialectRegex.Replace(sql, "?");
-                return CheckForUnmatchedPairs(MySqlUnmatchedRegex, sanitizedSql);
+                sanitizedSql = Regex.Replace(sql, MySqlDialectPattern, "?", RegexOptions);
+                return CheckForUnmatchedPairs(MySqlUnmatchedPattern, sanitizedSql);
             case SqlDialect.Oracle:
-                sanitizedSql = OracleDialectRegex.Replace(sql, "?");
-                return CheckForUnmatchedPairs(OracleUnmatedRegex, sanitizedSql);
+                sanitizedSql = Regex.Replace(sql, OracleDialectPattern, "?", RegexOptions);
+                return CheckForUnmatchedPairs(OracleUnmatedPattern, sanitizedSql);
             case SqlDialect.Postgres:
-                sanitizedSql = PostgresDialectRegex.Replace(sql, "?");
-                return CheckForUnmatchedPairs(PostgresUnmatchedRegex, sanitizedSql);
+                sanitizedSql = Regex.Replace(sql, PostgresDialectPattern, "?", RegexOptions);
+                return CheckForUnmatchedPairs(PostgresUnmatchedPattern, sanitizedSql);
             default:
-                sanitizedSql = AllDialectsRegex.Replace(sql, "?");
-                return CheckForUnmatchedPairs(AllUnmatchedRegex, sanitizedSql);
+                sanitizedSql = Regex.Replace(sql, AllDialectsPattern, "?", RegexOptions);
+                return CheckForUnmatchedPairs(AllUnmatchedPattern, sanitizedSql);
         }
     }
 
@@ -58,8 +59,8 @@ internal static class SqlSanitizer
     /// Checks to see if there are any unclosed quotes or comments remaining in the sanitized SQL.
     /// If there are then ? is returned to prevent leaking sensitive data.
     /// </summary>
-    private static string CheckForUnmatchedPairs(Regex regex, string sanitizedSql)
+    private static string CheckForUnmatchedPairs(string pattern, string sanitizedSql)
     {
-        return regex.Match(sanitizedSql).Success == true ? "?" : sanitizedSql;
+        return Regex.Match(sanitizedSql, pattern, RegexOptions).Success == true ? "?" : sanitizedSql;
     }
 }
