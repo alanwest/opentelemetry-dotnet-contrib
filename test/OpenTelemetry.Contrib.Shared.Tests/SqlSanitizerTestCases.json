@@ -23,8 +23,8 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -32,8 +32,8 @@
     "sql": "SELECT \"t001\".\"c2\" FROM \"t001\" WHERE \"t001\".\"c2\" = 'value' AND c3=1234 LIMIT 1",
     "sanitized": "SELECT \"t001\".\"c2\" FROM \"t001\" WHERE \"t001\".\"c2\" = ? AND c3=? LIMIT ?",
     "dialects": [
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -52,8 +52,8 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -62,8 +62,8 @@
     "sanitized": "SELECT * FROM foo WHERE bar=? ?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -72,8 +72,8 @@
     "sanitized": "SELECT * FROM foobar WHERE password=?\n?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -82,8 +82,8 @@
     "sanitized": "SELECT foo, bar FROM baz WHERE password=? ?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -114,8 +114,8 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -125,8 +125,8 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -144,8 +144,8 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -155,8 +155,8 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ],
     "comments": [
       "If backslashes are being ignored in single-quoted strings",
@@ -171,8 +171,8 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -182,8 +182,8 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -209,8 +209,8 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ],
     "comments": [
       "If backslashes are being ignored in single-quoted strings",
@@ -233,8 +233,8 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -243,8 +243,8 @@
     "sanitized": "SELECT * FROM table WHERE name=?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -254,8 +254,8 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -264,10 +264,9 @@
     "sanitized": "SELECT * FROM t WHERE ?\n  bar=? ?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
-    ],
-    "pathological": true
+      "oracle",
+      "postgres"
+    ]
   },
   {
     "name": "pathological/mixed_comments_and_quotes",
@@ -275,10 +274,9 @@
     "sanitized": "SELECT * FROM t WHERE ? \n  bar=? ?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
-    ],
-    "pathological": true
+      "oracle",
+      "postgres"
+    ]
   },
   {
     "name": "pathological/mixed_quotes_comments_and_newlines",
@@ -286,10 +284,9 @@
     "sanitized": "SELECT * FROM t WHERE ?\n  ? c2=? ?\n  c=? ?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
-    ],
-    "pathological": true
+      "oracle",
+      "postgres"
+    ]
   },
   {
     "name": "pathological/mixed_quotes_end_of_line_comments",
@@ -297,10 +294,9 @@
     "sanitized": "SELECT * FROM t WHERE ?\n  c=? ?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
-    ],
-    "pathological": true
+      "oracle",
+      "postgres"
+    ]
   },
   {
     "name": "pathological/quote_delimiters_in_comments",
@@ -308,10 +304,9 @@
     "sanitized": "SELECT * FROM foo WHERE col=? AND ? col2=? ?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
-    ],
-    "pathological": true
+      "oracle",
+      "postgres"
+    ]
   },
   {
     "name": "malformed/unterminated_double_quoted_string.mysql",
@@ -319,8 +314,7 @@
     "sanitized": "?",
     "dialects": [
       "mysql"
-    ],
-    "malformed": true
+    ]
   },
   {
     "name": "malformed/unterminated_single_quoted_string",
@@ -328,10 +322,9 @@
     "sanitized": "?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
-    ],
-    "malformed": true
+      "oracle",
+      "postgres"
+    ]
   },
   {
     "name": "dollar_quotes",
@@ -356,20 +349,19 @@
     "dialects": [
       "mssql",
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
-    "name": "end_of_string_backslash_and_line_comment_with_quite",
+    "name": "end_of_string_backslash_and_line_comment_with_quote",
     "sql": "select * from users where user = 'user1\\' password = 'hunter 2' -- ->don't count this quote",
     "sanitized": "select * from users where user = ?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
-    ],
-    "pathological": true
+      "oracle",
+      "postgres"
+    ]
   },
   {
     "name": "oracle_bracket_quote",
@@ -417,8 +409,8 @@
     "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -427,8 +419,8 @@
     "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
       "mysql",
-      "postgres",
-      "oracle"
+      "oracle",
+      "postgres"
     ]
   },
   {
@@ -477,10 +469,10 @@
     "sql": "select * from foo where bar IN (123, 456, 789)",
     "sanitized": "select * from foo where bar IN (?, ?, ?)",
     "dialects": [
+      "mssql",
       "mysql",
-      "postgres",
       "oracle",
-      "mssql"
+      "postgres"
     ]
   },
   {
@@ -488,10 +480,10 @@
     "sql": "select * from foo where bar IN ('asdf', 'fdsa')",
     "sanitized": "select * from foo where bar IN (?, ?)",
     "dialects": [
+      "mssql",
       "mysql",
-      "postgres",
       "oracle",
-      "mssql"
+      "postgres"
     ]
   }
 ]
