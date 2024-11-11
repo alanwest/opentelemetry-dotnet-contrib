@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Simple",
+    "sqlStatement": "SELECT * FROM dbo.Users",
+    "expectedDbName": "TestDatabase"
+  },
+  {
+    "name": "Simple with unobfuscated parameter",
+    "sqlStatement": "SELECT * FROM dbo.Users WHERE UserID = 1",
+    "expectedDbName": "TestDatabase"
+  }
+]
