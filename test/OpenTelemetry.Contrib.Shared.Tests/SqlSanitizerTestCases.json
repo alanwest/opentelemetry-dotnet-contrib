@@ -12,7 +12,6 @@
     "sql": "SELECT * FROM t WHERE foo=\"bar/*\" AND baz=\"whatever */qux\"",
     "sanitized": "SELECT * FROM t WHERE foo=? AND baz=?",
     "dialects": [
-      "mssql",
       "mysql"
     ]
   },
@@ -28,10 +27,11 @@
     ]
   },
   {
-    "name": "double_quoted_identifiers.postgres",
+    "name": "double_quoted_identifiers",
     "sql": "SELECT \"t001\".\"c2\" FROM \"t001\" WHERE \"t001\".\"c2\" = 'value' AND c3=1234 LIMIT 1",
     "sanitized": "SELECT \"t001\".\"c2\" FROM \"t001\" WHERE \"t001\".\"c2\" = ? AND c3=? LIMIT ?",
     "dialects": [
+      "mssql",
       "oracle",
       "postgres"
     ]
@@ -41,7 +41,6 @@
     "sql": "SELECT * FROM t WHERE foo=\"bar--\" AND\n  baz=\"qux--\"",
     "sanitized": "SELECT * FROM t WHERE foo=? AND\n  baz=?",
     "dialects": [
-      "mssql",
       "mysql"
     ]
   },
@@ -61,6 +60,7 @@
     "sql": "SELECT * FROM foo WHERE bar='baz' /* Hide Me */",
     "sanitized": "SELECT * FROM foo WHERE bar=? ?",
     "dialects": [
+      "mssql",
       "mysql",
       "oracle",
       "postgres"
@@ -71,6 +71,7 @@
     "sql": "SELECT * FROM foobar WHERE password='hunter2'\n-- No peeking!",
     "sanitized": "SELECT * FROM foobar WHERE password=?\n?",
     "dialects": [
+      "mssql",
       "mysql",
       "oracle",
       "postgres"
@@ -81,6 +82,7 @@
     "sql": "SELECT foo, bar FROM baz WHERE password='hunter2' # Secret",
     "sanitized": "SELECT foo, bar FROM baz WHERE password=? ?",
     "dialects": [
+      "mssql",
       "mysql",
       "oracle",
       "postgres"
@@ -263,6 +265,7 @@
     "sql": "SELECT * FROM t WHERE -- '\n  bar='baz' -- '",
     "sanitized": "SELECT * FROM t WHERE ?\n  bar=? ?",
     "dialects": [
+      "mssql",
       "mysql",
       "oracle",
       "postgres"
@@ -273,6 +276,7 @@
     "sql": "SELECT * FROM t WHERE /* ' */ \n  bar='baz' -- '",
     "sanitized": "SELECT * FROM t WHERE ? \n  bar=? ?",
     "dialects": [
+      "mssql",
       "mysql",
       "oracle",
       "postgres"
@@ -283,6 +287,7 @@
     "sql": "SELECT * FROM t WHERE -- '\n  /* ' */ c2='xxx' /* ' */\n  c='x\n  xx' -- '",
     "sanitized": "SELECT * FROM t WHERE ?\n  ? c2=? ?\n  c=? ?",
     "dialects": [
+      "mssql",
       "mysql",
       "oracle",
       "postgres"
@@ -293,6 +298,7 @@
     "sql": "SELECT * FROM t WHERE -- '\n  c='x\n  xx' -- '",
     "sanitized": "SELECT * FROM t WHERE ?\n  c=? ?",
     "dialects": [
+      "mssql",
       "mysql",
       "oracle",
       "postgres"
@@ -303,6 +309,7 @@
     "sql": "SELECT * FROM foo WHERE col='value1' AND /* don't */ col2='value1' /* won't */",
     "sanitized": "SELECT * FROM foo WHERE col=? AND ? col2=? ?",
     "dialects": [
+      "mssql",
       "mysql",
       "oracle",
       "postgres"
@@ -321,6 +328,7 @@
     "sql": "SELECT * FROM table WHERE foo='bar' AND baz='nothing to see here",
     "sanitized": "?",
     "dialects": [
+      "mssql",
       "mysql",
       "oracle",
       "postgres"
@@ -400,6 +408,7 @@
     "sql": "select * from foo where bar=0x2F and x=5",
     "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
+      "mssql",
       "mysql"
     ]
   },
@@ -408,6 +417,7 @@
     "sql": "select * from foo where bar=1.234e-5 and x=5",
     "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
+      "mssql",
       "mysql",
       "oracle",
       "postgres"
@@ -418,6 +428,7 @@
     "sql": "select * from foo where bar=-1.234e-5 and x=-5",
     "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
+      "mssql",
       "mysql",
       "oracle",
       "postgres"
@@ -428,6 +439,7 @@
     "sql": "select * from foo where bar=01234567-89ab-cdef-0123-456789abcdef and x=5",
     "sanitized": "select * from foo where bar=? and x=?",
     "dialects": [
+      "mssql",
       "postgres"
     ]
   },

@@ -19,11 +19,13 @@ internal static class SqlSanitizer
     private const string Number = "-?\\b(?:[0-9_]+\\.)?[0-9_]+([eE][+-]?[0-9_]+)?";
 
     private const string AllUnmatchedPattern = "'|\"|/\\*|\\*/|\\$";
+    private const string MsSqlUnmatchedPattern = "'|/\\*|\\*/";
     private const string MySqlUnmatchedPattern = "'|\"|/\\*|\\*/";
     private const string PostgresUnmatchedPattern = "'|/\\*|\\*/|\\$(?!\\?)";
     private const string OracleUnmatedPattern = "'|/\\*|\\*/";
 
     private static readonly string AllDialectsPattern = string.Join("|", SingleQuote, DoubleQuote, DollarQuote, OracleQuote, Comment, MultilineComment, Uuid, Hex, Boolean, Number);
+    private static readonly string MsSqlDialectPattern = string.Join("|", SingleQuote, Comment, MultilineComment, Uuid, Hex, Boolean, Number);
     private static readonly string MySqlDialectPattern = string.Join("|", SingleQuote, DoubleQuote, Comment, MultilineComment, Hex, Boolean, Number);
     private static readonly string PostgresDialectPattern = string.Join("|", SingleQuote, DollarQuote, Comment, MultilineComment, Uuid, Boolean, Number);
     private static readonly string OracleDialectPattern = string.Join("|", SingleQuote, OracleQuote, Comment, MultilineComment, Number);
@@ -43,6 +45,9 @@ internal static class SqlSanitizer
             case SqlDialect.MySql:
                 sanitizedSql = Regex.Replace(sql, MySqlDialectPattern, "?", RegexOptions);
                 return CheckForUnmatchedPairs(MySqlUnmatchedPattern, sanitizedSql);
+            case SqlDialect.MsSql:
+                sanitizedSql = Regex.Replace(sql, MsSqlDialectPattern, "?", RegexOptions);
+                return CheckForUnmatchedPairs(MsSqlUnmatchedPattern, sanitizedSql);
             case SqlDialect.Oracle:
                 sanitizedSql = Regex.Replace(sql, OracleDialectPattern, "?", RegexOptions);
                 return CheckForUnmatchedPairs(OracleUnmatedPattern, sanitizedSql);
